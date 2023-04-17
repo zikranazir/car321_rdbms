@@ -1,0 +1,96 @@
+SELECT * FROM users;
+
+SELECT * FROM advertisements;
+
+SELECT * FROM locations;
+
+SELECT * FROM bids;
+
+
+
+-- Trasactional Query 
+-- Test 1
+SELECT 
+	a.ads_id AS product_id,
+	a.brand AS merk,
+	a.model,
+	a.manufacturing_year AS year,
+	a.price 
+FROM advertisements a
+WHERE a.manufacturing_year > 2015;
+
+-- Test 2
+INSERT INTO bids 
+	(bid_id, 
+	 bid_status, 
+	 bid_price, 
+	 ads_id, user_id)
+VALUES 
+	(2200, 'winning', 
+	 93000000, 1
+	 26353358, 1024);
+	 
+-- Test 3
+SELECT 
+	a.ads_id AS product_id,
+	a.brand AS merk,
+	a.model,
+	a.manufacturing_year AS year,
+	a.price
+FROM advertisements a
+JOIN users u ON u.user_id = a.user_id
+WHERE a.user_id = 1078;
+
+
+--Test 4
+SELECT 
+	a.ads_id AS product_id,
+	a.brand AS merk,
+	a.model,
+	a.manufacturing_year AS year,
+	a.price
+FROM advertisements a
+WHERE a.model = 'Innova';
+
+-- Test 5
+SELECT 
+    ads.ads_id as product_id, 
+    ads.brand as merk, 
+    ads.model, 
+    ads.manufacturing_year as year, 
+    ads.price, 
+    ROUND(sqrt(power(ads_loc.latitude - target_loc.latitude, 2) 
+			   + power(ads_loc.longitude - target_loc.longitude, 2))) as distance
+FROM 
+    advertisements ads
+    JOIN locations ads_loc ON ads.location_id = ads_loc.location_id
+    JOIN locations target_loc ON target_loc.location_id = 4000018
+ORDER BY 
+    distance ASC
+LIMIT 3;
+
+
+--Analytical Query
+--Test 1
+SELECT model, COUNT(DISTINCT bids.ads_id) AS count_product, COUNT(*) AS count_bid
+FROM advertisements
+INNER JOIN bids ON advertisements.ads_id = bids.ads_id
+GROUP BY model
+ORDER BY count_bid DESC
+LIMIT 5;
+
+
+--Test 2
+SELECT 
+    l.city AS "nama kota", 
+    a.brand AS "merk", 
+    a.model, 
+    a.manufacturing_year AS "tahun", 
+    a.price AS "price", 
+    ROUND(AVG(a.price) OVER (PARTITION BY l.location_id)) AS "avrg_price"
+FROM 
+    advertisements a 
+    JOIN locations l ON a.location_id = l.location_id
+ORDER BY 
+    l.city ASC, a.brand ASC, a.model ASC, a.manufacturing_year ASC;
+
